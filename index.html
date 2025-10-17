@@ -1,10 +1,203 @@
-<!doctype html>
-<!-- ICON TAROT website file generated for GitHub repo deployment -->
-<!-- Full code from ChatGPT 2025-10-11 -->
-<!-- Save as index.html and upload with ICON1.png to your GitHub repository -->
-<html lang="en">
-<head><meta charset="utf-8"><title>ICON TAROT</title></head>
-<body>
-<p>The complete HTML version was generated successfully. Please use the export function to preview or upload.</p>
-</body>
-</html>
+import React from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Sparkles, Phone, Mail, MessageCircle, Star, Calendar, Heart, Moon, Sun, MapPin } from "lucide-react";
+
+// Brand constants
+const BRAND = {
+  name: "Kasturi Divine",
+  owner: "Neitu Choudhary",
+  email: "kasturidivineindia@gmail.com",
+  phone: "+919354370946",
+  whatsappGroup: "https://chat.whatsapp.com/JyjgJl72hxcDaTGvMe0Ax1",
+  tagline: "Astrology • Numerology • Remedies",
+  blurb:
+    "Personalized guidance through Vedic Astrology and Chaldean Numerology — with practical, compassionate remedies you can follow at home.",
+};
+
+function SectionTitle({ title, subtitle }: { title: string; subtitle?: string }) {
+  return (
+    <div className="text-center mb-8">
+      <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">{title}</h2>
+      {subtitle && <p className="text-slate-600 mt-2 max-w-2xl mx-auto">{subtitle}</p>}
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-amber-50/60 via-white to-white text-slate-900">
+      {/* Nav */}
+      <header className="sticky top-0 z-20 backdrop-blur bg-white/80 border-b">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-6 w-6 text-amber-600"/>
+            <span className="font-semibold text-lg">{KASTURI DIVINE}</span>
+          </div>
+          <nav className="hidden md:flex items-center gap-6 text-sm">
+            <a href="#services" className="hover:text-amber-700">Services</a>
+            <a href="#about" className="hover:text-amber-700">About</a>
+            <a href="#dasha" className="hover:text-amber-700">Dasha</a>
+            <a href="#testimonials" className="hover:text-amber-700">Testimonials</a>
+            <a href="#contact" className="hover:text-amber-700">Contact</a>
+          </nav>
+          <div className="flex items-center gap-2">
+            <a href={`tel:${BRAND.phone}`}><Button variant="outline" className="hidden md:inline-flex"><Phone className="h-4 w-4 mr-2"/>Call</Button></a>
+            <a href={BRAND.whatsappGroup} target="_blank" rel="noreferrer"><Button><MessageCircle className="h-4 w-4 mr-2"/>Join WhatsApp</Button></a>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(251,191,36,0.25),transparent_40%),radial-gradient(ellipse_at_bottom_right,rgba(217,249,157,0.2),transparent_40%)]"/>
+        <div className="max-w-6xl mx-auto px-4 py-16 md:py-24 relative">
+          <motion.h1 initial={{opacity:0, y:8}} animate={{opacity:1, y:0}} transition={{duration:0.5}} className="text-3xl md:text-5xl font-bold tracking-tight">
+            {KASTURI DIVINE}
+          </motion.h1>
+          <p className="mt-3 text-lg text-slate-700">{BRAND.tagline}</p>
+          <p className="mt-2 max-w-2xl text-slate-600">{BRAND.blurb}</p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a href="#contact"><Button size="lg"><Calendar className="h-4 w-4 mr-2"/>Book Consultation</Button></a>
+            <a href="mailto:kasturidivineindia@gmail.com"><Button size="lg" variant="outline"><Mail className="h-4 w-4 mr-2"/>Email Us</Button></a>
+          </div>
+          <div className="mt-4 text-sm text-slate-600 flex items-center gap-2"><MapPin className="h-4 w-4"/>India • Online & In‑person by appointment</div>
+        </div>
+      </section>
+
+      {/* Services */}
+      <section id="services" className="max-w-6xl mx-auto px-4 py-14">
+        <SectionTitle title="Services" subtitle="Clarity-focused readings with actionable remedies."/>
+        <div className="grid md:grid-cols-3 gap-5">
+          {[
+            {icon: <Moon className="h-5 w-5"/>, title: "Vedic Astrology", desc: "Birth chart reading, transit analysis, Dasha timing, and personalized upāyas."},
+            {icon: <Sun className="h-5 w-5"/>, title: "Numerology", desc: "Chaldean name correction, personal year cycles, business & signature numbers."},
+            {icon: <Heart className="h-5 w-5"/>, title: "Matchmaking & Muhurta", desc: "Kundli matching and auspicious date selection for key life events."},
+            {icon: <Star className="h-5 w-5"/>, title: "Remedies Guidance", desc: "Mantra, daana, ratna & daily routines that fit your lifestyle."},
+            {icon: <Calendar className="h-5 w-5"/>, title: "Yearly Prediction", desc: "Solar return & Dasha blend to plan your year with confidence."},
+            {icon: <Sparkles className="h-5 w-5"/>, title: "Business Consulting", desc: "Name/Logo vibration check, launch dates, and prosperity alignment."},
+          ].map((s, i)=> (
+            <Card key={i} className="rounded-2xl shadow-sm">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2 font-semibold">{s.icon}{s.title}</div>
+                <p className="text-sm text-slate-600 mt-2">{s.desc}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* Dasha CTA */}
+      <section id="dasha" className="bg-amber-50/60 border-y">
+        <div className="max-w-6xl mx-auto px-4 py-14">
+          <SectionTitle title="Vimshottari Dasha Calculator" subtitle="Check Mahadasha and Antar periods fast. (Lahiri)"/>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <a href="#contact"><Button size="lg"><Calendar className="h-4 w-4 mr-2"/>Get My Dasha Reading</Button></a>
+            <a href="/dasha" className="hidden"><Button size="lg" variant="outline">Open Calculator</Button></a>
+          </div>
+          <p className="text-center text-sm text-slate-600 mt-3">Ask for a detailed PDF with remedies and important dates.</p>
+        </div>
+      </section>
+
+      {/* About */}
+      <section id="about" className="max-w-6xl mx-auto px-4 py-14">
+        <SectionTitle title="About {BRAND.name}" subtitle="Guidance by {BRAND.owner}"/>
+        <div className="grid md:grid-cols-2 gap-6 items-start">
+          <Card className="rounded-2xl shadow-sm">
+            <CardContent className="p-6">
+              <h3 className="font-semibold mb-2">Our Philosophy</h3>
+              <p className="text-sm text-slate-700">We focus on practical, ethical, and compassionate guidance. Every chart is unique—so are our remedies. We blend classical techniques with modern clarity to help you make better decisions.</p>
+              <ul className="mt-3 text-sm list-disc pl-5 text-slate-700 space-y-1">
+                <li>Clear timelines using Dasha and transits</li>
+                <li>Simple, do‑able remedies</li>
+                <li>Honest, confidential consultations</li>
+              </ul>
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl shadow-sm">
+            <CardContent className="p-6">
+              <h3 className="font-semibold mb-2">Why {BRAND.name}?</h3>
+              <p className="text-sm text-slate-700">Trusted by clients for accurate timing and grounded advice. From relationships and health to career and finance, we decode patterns and suggest practical steps.</p>
+              <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+                <div className="rounded-xl border p-3">Quick slots available</div>
+                <div className="rounded-xl border p-3">Online sessions (PAN‑India)</div>
+                <div className="rounded-xl border p-3">PDF reports</div>
+                <div className="rounded-xl border p-3">Follow‑up support</div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section id="testimonials" className="bg-slate-50 border-y">
+        <div className="max-w-6xl mx-auto px-4 py-14">
+          <SectionTitle title="What Clients Say" subtitle="Real experiences, real guidance."/>
+          <div className="grid md:grid-cols-3 gap-5">
+            {["Clear guidance, felt lighter after session.", "Their numerology corrections improved my branding.", "Accurate dates for job change—helped a lot!"].map((t, i)=> (
+              <Card key={i} className="rounded-2xl shadow-sm">
+                <CardContent className="p-5">
+                  <p className="text-sm text-slate-700">“{t}”</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Contact */}
+      <section id="contact" className="max-w-6xl mx-auto px-4 py-14">
+        <SectionTitle title="Contact & Booking" subtitle="Send your details—We’ll reply with available slots."/>
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card className="rounded-2xl shadow-sm">
+            <CardContent className="p-6 space-y-3">
+              <div className="flex items-center gap-2 text-sm"><Phone className="h-4 w-4"/> <a href={`tel:${BRAND.phone}`} className="hover:underline">{BRAND.phone}</a></div>
+              <div className="flex items-center gap-2 text-sm"><Mail className="h-4 w-4"/> <a href={`mailto:${BRAND.email}`} className="hover:underline">{BRAND.email}</a></div>
+              <div className="flex items-center gap-2 text-sm"><MessageCircle className="h-4 w-4"/> <a target="_blank" rel="noreferrer" href={BRAND.whatsappGroup} className="hover:underline">Join WhatsApp Group</a></div>
+              <p className="text-sm text-slate-600">Share your Name, DOB, TOB, Place, and query. For Dasha/Remedies reports, mention if you prefer Hindi or English.</p>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-2xl shadow-sm">
+            <CardContent className="p-6">
+              <form className="space-y-3" onSubmit={(e)=>{e.preventDefault(); alert('Thanks! We will contact you shortly.')}}>
+                <Input placeholder="Full Name" required />
+                <div className="grid grid-cols-2 gap-3">
+                  <Input type="date" placeholder="Date of Birth" required />
+                  <Input type="time" placeholder="Time of Birth" required />
+                </div>
+                <Input placeholder="Place of Birth" required />
+                <Textarea placeholder="Your question / area of focus" rows={4} required />
+                <div className="flex gap-2">
+                  <Button type="submit">Send</Button>
+                  <a href={BRAND.whatsappGroup} target="_blank" rel="noreferrer"><Button type="button" variant="outline"><MessageCircle className="h-4 w-4 mr-2"/>WhatsApp</Button></a>
+                </div>
+                <p className="text-xs text-slate-500">Submitting this form will not send an email automatically in this demo. We’ll set up form handling or WhatsApp API on your domain.</p>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t">
+        <div className="max-w-6xl mx-auto px-4 py-8 text-sm text-slate-600 flex flex-col md:flex-row items-center justify-between gap-2">
+          <div>© {new Date().getFullYear()} {BRAND.name}. All rights reserved.</div>
+          <div className="flex items-center gap-4">
+            <a href={`mailto:${BRAND.email}`} className="hover:underline">Email</a>
+            <a href={`tel:${BRAND.phone}`} className="hover:underline">Call</a>
+            <a href={BRAND.whatsappGroup} target="_blank" rel="noreferrer" className="hover:underline">WhatsApp</a>
+          </div>
+        </div>
+      </footer>
+
+      {/* Floating WhatsApp */}
+      <a href={BRAND.whatsappGroup} target="_blank" rel="noreferrer" className="fixed bottom-5 right-5">
+        <Button className="rounded-full h-12 w-12 p-0 shadow-lg" aria-label="Join WhatsApp"><MessageCircle className="h-5 w-5"/></Button>
+      </a>
+    </div>
+  );
+}
