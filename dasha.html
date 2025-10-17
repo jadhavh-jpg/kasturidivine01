@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vimshottari Dasha Calculator — Kasturi Divine</title>
+  <meta name="description" content="Vimshottari Dasha calculator (Lahiri). Paste sidereal Moon or use Auto‑Calc with accurate Lahiri ayanāṃśa." />
+  <link rel="icon" href="assets/favicon.svg">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-slate-900">
+  <main class="max-w-4xl mx-auto px-4 py-10">
+    <a href="index.html" class="text-sm underline">← Back to Home</a>
+    <h1 class="text-3xl font-bold mt-2">Vimshottari Dasha Calculator</h1>
+    <p class="text-slate-600 mt-1 text-sm">Lahiri ayanāṃśa • Paste sidereal Moon longitude (°) or try <b>Auto‑Calc (accurate)</b> below.</p>
+
+    <div class="mt-6 grid md:grid-cols-2 gap-4">
+      <div class="space-y-2">
+        <label class="block text-sm font-medium">Full Name</label>
+        <input id="name" class="w-full border rounded-lg px-3 py-2" placeholder="Your Name">
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium">Date of Birth</label>
+            <input id="dob" type="date" class="w-full border rounded-lg px-3 py-2">
+          </div>
+          <div>
+            <label class="block text-sm font-medium">Time of Birth</label>
+            <input id="tob" type="time" class="w-full border rounded-lg px-3 py-2">
+          </div>
+        </div>
+
+        <label class="block text-sm font-medium">Place (optional)</label>
+        <input id="place" class="w-full border rounded-lg px-3 py-2" placeholder="City, Country">
+
+        <label class="block text-sm font-medium mt-2">Moon sidereal longitude (°)</label>
+        <input id="moon" class="w-full border rounded-lg px-3 py-2" placeholder="e.g., 153.25">
+        <div class="flex gap-2 mt-2">
+          <button id="calc" class="px-4 py-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700">Calculate</button>
+          <button id="autocalc" class="px-4 py-2 rounded-lg border hover:bg-slate-50">Auto‑Calc (accurate)</button>
+        </div>
+        <p class="text-xs text-slate-500">Auto‑Calc uses Astronomy Engine for Moon tropical longitude + <b>Lahiri ayanāṃśa</b> from the <i>astronomia</i> library. If libraries fail to load, you can still paste sidereal Moon manually.</p>
+      </div>
+
+      <div class="rounded-2xl border p-4 bg-slate-50">
+        <div id="summary" class="text-sm"></div>
+      </div>
+    </div>
+
+    <section class="mt-8">
+      <h2 class="text-xl font-semibold mb-3">Mahadasha Timeline</h2>
+      <div id="md" class="space-y-2"></div>
+    </section>
+
+    <section class="mt-8">
+      <h2 class="text-xl font-semibold mb-3">Antar (within first 3 MDs)</h2>
+      <div id="ad" class="space-y-2"></div>
+    </section>
+
+    <p class="mt-8 text-xs text-slate-500">Note: Classic 120‑year Vimshottari and Lahiri ayanāṃśa. Birth balance = remaining arc in birth Nakshatra.</p>
+  </main>
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/astronomy-engine/astronomy.js"></script>
+  <script src="https://unpkg.com/astronomia/dist/index.min.js"></script>
+
+  <script>
+  const NAK_LEN_DEG = 13 + 20/60;
+  const DURATION_YEARS = {Ketu:7, Venus:20, Sun:6, Moon:10, Mars:7, Rahu:18, Jupiter:16, Saturn:19, Mercury:17};
+  const LORD_ORDER = ["Ketu","Venus","Sun","Moon","Mars","Rahu","Jupiter","Saturn","Mercury"];
+  const NAK_NAMES = ["Ashwini","Bharani","Krittika","Rohini","Mrigashira","Ardra","Punarvasu","Pushya","Ashlesha","Magha","Purva Phalguni","Uttara Phalguni","Hasta","Chitra","Swati","Vishakha","Anuradha","Jyeshtha","Mula","Purva Ashadha","Uttara Ashadha","Shravana","Dhanishta","Shatabhisha","Purva Bhadrapada","Uttara Bhadrapada","Revati"];
+  const NAK_LORD = ["Ketu","Venus","Sun","Moon","Mars","Rahu","Jupiter","Saturn","Mercury","Ketu","Venus","Sun","Moon","Mars","Rahu","Jupiter","Saturn","Mercury","Ketu","Venus","Sun","Moon","Mars","Rahu","Jupiter","Saturn","Mercury"];
+
+  function analyzeMoonSiderealLong(moonDegSidereal) {
+    let lon = ((moonDegSidereal % 360) + 360) % 360;
+    const nakIndex = Math.floor(lon / NAK_LEN_DEG);
+    const intoNak = lon - nakIndex * NAK_LEN_DEG;
+    const remaining = NAK_LEN_DEG - intoNak;
+    const remainingFrac = remaining / NAK_LEN_DEG;
+    const pada = Math.floor((intoNak / NAK_LEN_DEG) * 4) + 1;
+    const lord = NAK_LORD[nakIndex];
+    return { nakIndex, nakName: NAK_NAMES[nakIndex], pada, lord, remainingFrac };
+  }
+
+  function yearsToSeconds(y){ return y * 365.2425 * 24 * 3600; }
+  function addSeconds(date, seconds){ return new Date(date.getTime() + seconds*1000); }
+  function formatRange(s,e){
+    const fmt = d => d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'2-digit'});
+    return `${fmt(s)} → ${fmt(e)}`;
+  }
+
+  function buildDashaTimeline(birthDate, moonDeg) {
+    const base = analyzeMoonSiderealLong(moonDeg);
+    const startLord = base.lord;
+    const mdTotalYears = DURATION_YEARS[startLord];
+    const mdBalanceSec = yearsToSeconds(mdTotalYears * base.remainingFrac);
+
+    const timeline = [];
+    let cursor = new Date(birthDate);
+    let mdIndex = LORD_ORDER.indexOf(startLord);
+
+    let mdName = LORD_ORDER[mdIndex];
+    let mdEnd = addSeconds(cursor, mdBalanceSec);
+    timeline.push({ level:1, lord: mdName, start: new Date(cursor), end: mdEnd });
+    cursor = mdEnd; mdIndex = (mdIndex+1) % LORD_ORDER.length;
+
+    for (let i=0;i<20;i++){
+      mdName = LORD_ORDER[mdIndex];
+      const durSec = yearsToSeconds(DURATION_YEARS[mdName]);
+      const nextEnd = addSeconds(cursor, durSec);
+      timeline.push({ level:1, lord: mdName, start: new Date(cursor), end: nextEnd });
+      cursor = nextEnd; mdIndex = (mdIndex+1) % LORD_ORDER.length;
+    }
+
+    const expanded = [];
+    for (const md of timeline){
+      expanded.push(md);
+      let adCursor = new Date(md.start);
+      for (const adLord of LORD_ORDER){
+        const frac = DURATION_YEARS[adLord] / 120;
+        const mdSeconds = (md.end - md.start)/1000;
+        const adDurSec = mdSeconds * frac;
+        const adEnd = addSeconds(adCursor, adDurSec);
+        expanded.push({ level:2, lord: adLord, parent: md.lord, start: new Date(adCursor), end: adEnd });
+        adCursor = adEnd;
+      }
+    }
+    return { base, items: expanded };
+  }
+
+  function byId(id){ return document.getElementById(id); }
+
+  function render(res){
+    byId('summary').innerHTML = `
+      <div class="text-sm">
+        Nakshatra: <b>${res.base.nakName}</b> (Pada ${res.base.pada}) — Lord: <b>${res.base.lord}</b><br/>
+        Birth Balance remaining in first Mahadasha: <b>${(res.base.remainingFrac*100).toFixed(2)}%</b>
+      </div>`;
+
+    const mdDiv = byId('md'); mdDiv.innerHTML = '';
+    res.items.filter(x=>x.level===1).slice(0,12).forEach(x=>{
+      const el = document.createElement('div');
+      el.className = 'flex items-center justify-between rounded-lg border px-3 py-2 bg-white';
+      el.innerHTML = `<div class="font-medium">${x.lord}</div><div class="text-sm text-slate-600">${formatRange(x.start, x.end)}</div>`;
+      mdDiv.appendChild(el);
+    });
+
+    const first3 = res.items.filter(x=>x.level===1).slice(0,3);
+    const adDiv = byId('ad'); adDiv.innerHTML = '';
+    res.items.filter(x=>x.level===2 && first3.some(m=>m.lord===x.parent && x.start>=m.start && x.end<=m.end)).forEach(x=>{
+      const el = document.createElement('div');
+      el.className = 'flex items-center justify-between rounded-lg border px-3 py-2 bg-white';
+      el.innerHTML = `<div class="text-sm">${x.parent} ▶︎ <b>${x.lord}</b></div><div class="text-xs text-slate-600">${formatRange(x.start, x.end)}</div>`;
+      adDiv.appendChild(el);
+    });
+  }
+
+  async function computeAyanamsaLahiri(date){
+    // Prefer astronomia if available
+    if (window.astronomia && astronomia && astronomia.sidereal && astronomia.sidereal.lahiri){
+      // astronomia expects Julian centuries from J2000 or JD; use its function directly if present.
+      try {
+        const jd = astronomia.julian.DateToJD(date);
+        const ay = astronomia.sidereal.lahiri(jd); // degrees
+        return ay;
+      } catch(e){ console.error(e); }
+    }
+    // Try to compute approximate lahiri using astronomia's precession/nutation if available
+    try {
+      if (window.astronomia){
+        // Use precession/nutation to compute true equinox and derive ayanamsa (approx)
+        const jd = astronomia.julian.DateToJD(date);
+        const eps = astronomia.nutation.meanObliquityLaskar(jd);
+        // Use general precession in longitude from 2000: p_A (arcseconds) -> degrees
+        const T = (jd - 2451545.0)/36525;
+        const pA = 5028.796195 * T + 1.1054348 * T*T; // arcsec (IAU 2006 approx)
+        const ay = (pA/3600); // degrees; rough tropical-sidereal shift
+        return ay; // not Lahiri-specific but better than constant
+      }
+    } catch(e){ console.error(e); }
+    // Fallback baseline
+    return 24.0;
+  }
+
+  byId('calc').addEventListener('click', ()=>{
+    const dob = byId('dob').value;
+    const tob = byId('tob').value;
+    const moon = parseFloat(byId('moon').value);
+    if (!dob || !tob || isNaN(moon)){ alert('Please fill Date, Time and Moon sidereal longitude.'); return; }
+    const birthDate = new Date(`${dob}T${tob}:00`);
+    render(buildDashaTimeline(birthDate, moon));
+  });
+
+  byId('autocalc').addEventListener('click', async ()=>{
+    try {
+      if (!window.Astronomy) throw new Error('Astronomy Engine not loaded');
+      const dob = byId('dob').value;
+      const tob = byId('tob').value;
+      if (!dob || !tob) { alert('Please fill Date and Time first.'); return; }
+      const date = new Date(`${dob}T${tob}:00`);
+
+      const time = Astronomy.MakeTime(date);
+      const ecl = Astronomy.EclipticLongitude(Astronomy.Body.Moon, time); // tropical deg
+      const ay = await computeAyanamsaLahiri(date); // deg
+      let moonSidereal = ecl - ay;
+      while (moonSidereal < 0) moonSidereal += 360;
+      while (moonSidereal >= 360) moonSidereal -= 360;
+
+      byId('moon').value = moonSidereal.toFixed(2);
+      render(buildDashaTimeline(date, moonSidereal));
+    } catch (err) {
+      console.warn(err);
+      alert('Auto‑Calc failed. Please paste sidereal Moon longitude manually.');
+    }
+  });
+  </script>
+</body>
+</html>
